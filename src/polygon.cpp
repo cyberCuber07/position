@@ -43,3 +43,12 @@ vec_p2f Polygon :: get_all_centers() {
 
     return Cs;
 }
+
+
+vec_i Polygon :: sameMasks(const int & idx) {
+    /*
+     * method to find enougly close masks to the given one
+     *
+     * retult: vector of objects' [vec_polyarea] indexes [int]
+     * */
+}

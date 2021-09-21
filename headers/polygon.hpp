@@ -16,6 +16,9 @@ typedef std::vector<PolyArea*> vec_PolyArea;
  * and proceses it using shapes.hpp and polyarea.hpp modules
  *
  * stores all separate masks as PolyArea objects
+ * also enable to give all connections between them,
+ * that is check if they and which ones are enoughly
+ * close each other and connect them
  * */
 
 
@@ -31,7 +34,8 @@ private:
 public:
     Polygon (const std::string &);
     ~ Polygon();
-    vec_p2f get_all_centers();   
+    vec_p2f get_all_centers();
+    vec_i sameMasks(const int &);
 };
 
 #endif
