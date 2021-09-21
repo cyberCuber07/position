@@ -7,7 +7,8 @@ PolyArea :: PolyArea(const vec_i & x, const vec_i & y) : x(x), y(y) {
 
 
 void PolyArea :: CalculateArea() {
-    area = (x[n_x - 1] * y[0] - y[n_x - 1] * x[0]);
+    // area = (x[n_x - 1] * y[0] - y[n_x - 1] * x[0]);
+    area = 0;
     for (int i = 0; i < n_x - 1; ++i)
         area += x[i] * y[i + 1] - y[i] * x[i + 1];
     area /= 2.;
@@ -15,7 +16,8 @@ void PolyArea :: CalculateArea() {
 
 
 float PolyArea :: count_one_cord (const vec_i & __x) {
-    assert (area != 0);
+    if (area == 0)
+        return 0;
     float sum = 0;
     for (int i = 0; i < n_x - 1; ++i)
         sum += (__x[i] + __x[i + 1]) * (x[i] * y[i + 1] - x[i + 1] * y[i]);

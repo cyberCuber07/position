@@ -3,7 +3,6 @@
 
 
 #include <vector>
-#include <cassert>
 
 typedef std::vector<int> vec_i;
 typedef std::pair<float,float> pair_2f;

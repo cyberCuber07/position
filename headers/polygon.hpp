@@ -9,12 +9,13 @@
 #include "polyarea.hpp"
 
 typedef std::vector<std::vector<bool>> vec_2d_b;
+typedef std::vector<PolyArea*> vec_PolyArea;
 
 /*
  * this module reads an image
  * and proceses it using shapes.hpp and polyarea.hpp modules
  *
- * result: center of a mask
+ * stores all separate masks as PolyArea objects
  * */
 
 
@@ -24,10 +25,12 @@ private:
     std::string file_path;
     cv::Mat image;
     vec_2d_p2i shapes;
+    vec_PolyArea vec_polyarea;
 
     cv::Mat read_image();
 public:
     Polygon (const std::string &);
+    ~ Polygon();
     vec_p2f get_all_centers();   
 };
 
