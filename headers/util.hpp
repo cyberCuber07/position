@@ -2,6 +2,8 @@
 #define __UTIL_HPP_
 
 #include <vector>
+#include <queue>
+#include <deque>
 
 namespace Types{
 
@@ -13,7 +15,7 @@ namespace Types{
     typedef std::vector<std::vector<bool>> vec_2d_b;
     typedef std::vector<int> vec_i;
     typedef std::pair<float,float> pair_2f;
-    typedef std::pair<float, std::pair<int,int>> DisIdxs
+    typedef std::pair<float, std::pair<int,int>> DisIdxs;
     /*
      * in DisIdxs:
      *      float              : distance

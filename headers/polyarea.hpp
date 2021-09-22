@@ -13,12 +13,13 @@ using namespace Types;
 
 class PolyArea{
 private:
-    vec_i x, y; // chain: X0 cord and Y0 cord
+    // vec_i x, y; // chain: X0 cord and Y0 cord
     int n_x, n_y;
     float area;
     pair_2f C; // consists of Cx and Cy --- X0 cord center and Y0 cord center
 public:   
     PolyArea(const vec_i &, const vec_i &);
+    vec_i x, y; // chain: X0 cord and Y0 cord
 
     void CalculateArea();
     pair_2f center();

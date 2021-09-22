@@ -1,5 +1,4 @@
 #include "../headers/polygon.hpp"
-#include <vector>
 #include <iostream>
 #include <algorithm> // for "std::rotate"
 #include <utility> // for "std::move"
@@ -84,16 +83,16 @@ void Polygon :: connectMasks (const int & main_idx, const int & idx) {
     vec_i x_main = vec_polyarea[main_idx] -> x,
           y_main = vec_polyarea[main_idx] -> y,
           x_idx = vec_polyarea[idx] -> x,
-          y_idx = vec_polyarea[idx] -> y,
+          y_idx = vec_polyarea[idx] -> y;
 
     // first
-    int n1 = x_main.size(), n2 = x_idx.size();
+    const int n1 = x_main.size(), n2 = x_idx.size();
     for (int i = 0; i < n1; ++i) {
         for (int j = 0; j < n2; ++j) {
             float curr_dis = q.front().first, // get distance value
                   tmp_dis = dis2(std::make_pair(x_main[i], y_main[i]), std::make_pair(x_idx[j], y_idx[j]));
             if (curr_dis > tmp_dis) {
-                q.push(tmp_dis, i, j); // TODO: change to std::make_pair(tmp_dis, std::make_pair(i, j))
+                q.push(tmp_dis, i, j);
             }
         }
     }
@@ -104,11 +103,11 @@ void Polygon :: connectMasks (const int & main_idx, const int & idx) {
      * 2. rewrite values from one chain to another
      * 3. delete object of not changed chain
      * */
-    const int chain_1_idx1 = q.front().second.first,
-              chain_2_idx1 = q.front().second.second;
+    int chain_1_idx1 = q.front().second.first,
+        chain_2_idx1 = q.front().second.second;
     q.pop();
-    const int chain_1_idx2 = q.front().second.first,
-              chain_2_idx2 = q.front().second.second;
+    int chain_1_idx2 = q.front().second.first,
+        chain_2_idx2 = q.front().second.second;
     q.pop();
     
     auto sort_idx = [](int & idx1, int & idx2){
@@ -127,8 +126,14 @@ void Polygon :: connectMasks (const int & main_idx, const int & idx) {
          * chain_idx := {main_idx, idx}
          * */
         int shift_val = n - chain_idx + 1;
-        std::rotate(vec_polyarea[type_idx] -> x.begin() + shift_val, vec_polyarea[type_idx] -> x.end());
-        std::rotate(vec_polyarea[type_idx] -> y.begin() + shift_val, vec_polyarea[type_idx] -> y.end());
+        // x cord
+        std::rotate(vec_polyarea[type_idx] -> x.begin(),
+                    vec_polyarea[type_idx] -> x.begin() + shift_val,
+                    vec_polyarea[type_idx] -> x.end());
+        // y cord
+        std::rotate(vec_polyarea[type_idx] -> y.begin(),
+                    vec_polyarea[type_idx] -> y.begin() + shift_val,
+                    vec_polyarea[type_idx] -> y.end());
     };
     // --- 1. ---
     shift_array(main_idx, chain_1_idx2, n1);
@@ -150,6 +155,7 @@ void Polygon :: connectMasks (const int & main_idx, const int & idx) {
     
     // third
     // TODO: delete chain_2 vec_polyarea object
+    vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
 }
 
 
@@ -194,8 +200,8 @@ vec_i Polygon :: sameMasks(const int & idx) {
              *
              * after: call method to earse idx's vec_polyarea object and change index (j in main loop) if necessary
              * */
-            if (connectMasks(i, idx))
-                rebuildMasks(i, idx, j, n);
+            connectMasks(i, idx);
+            rebuildMasks(i, idx, j, n);
             // else :: no need to rebuild as chains have not been modified
         }
     };
