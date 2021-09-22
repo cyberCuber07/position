@@ -13,17 +13,23 @@ namespace Types{
     typedef std::vector<std::vector<bool>> vec_2d_b;
     typedef std::vector<int> vec_i;
     typedef std::pair<float,float> pair_2f;
+    typedef std::pair<float, std::pair<int,int>> DisIdxs
+    /*
+     * in DisIdxs:
+     *      float              : distance
+     *      std::pair<int,int> : <chain_1_idx, chain_2_idx>
+     * */
 
-    template <typename T, int MaxLen, typename Container=std::deque<T>>
-    class FixedQueue : public std::queue<T, Container> {
+    template <typename T, int MaxLen, typename Container=std::deque<DisIdxs>>
+    class FixedQueue : public std::queue<DisIdxs, Container> {
     public:
-        void push (const T & value) {
+        void push (const T & value, const int & idx1, const int & idx2) {
             // TODO: add automatic sorting -> check if second is smaller / greater
             //       add complex type :: typedef std::pair<float, std::pair<int,int>> DisIdxs
             if (this -> size() == MaxLen) {
                 this -> c.pop_front();
             }
-            std::queue<T, Container> :: push (value);
+            std::queue<DisIdxs, Container> :: push (std::make_pair(value, std::make_pair(idx1, idx2)));
         }
     };
 
