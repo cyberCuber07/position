@@ -2,6 +2,7 @@
 #define __POLYGON_HPP_
 
 
+#include <queue>
 #include <vector>
 #include <string>
 #include <opencv2/highgui.hpp>
@@ -39,10 +40,11 @@ private:
     cv::Mat read_image();
     void setMaskDistance(const float &);
     void setPointMaskDistance(const float &);
-    void connectMasks (const int &, const int &);
+    void mergeMasks (const int &, const int &);
     float dis2(const pair_2f &, const pair_2f &);
     void rebuildMasks (int &, const int &, int &, int &);
     Types::FixedQueue<float,2> createFixedQueue ();
+    std::queue<int> bfs(const vec_b &, const int &, const int &);
 public:
     static float MASK_DISTANCE;
     static float POINT_MASK_DISTANCE;

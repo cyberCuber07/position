@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm> // for "std::rotate"
 #include <utility> // for "std::move"
+#include <vector>
+
 
 void Polygon :: setMaskDistance(const float & val=20) {
     MASK_DISTANCE = val * val;
@@ -67,7 +69,7 @@ Types::FixedQueue<float,2> Polygon :: createFixedQueue () {
 }
 
 
-void Polygon :: connectMasks (const int & main_idx, const int & idx) {
+void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
     /*
      * iterate over masks' chains to find two closest pairs of connections (if any)
      *
@@ -155,7 +157,7 @@ void Polygon :: connectMasks (const int & main_idx, const int & idx) {
     
     // third
     // TODO: delete chain_2 vec_polyarea object
-    vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
+    // vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
 }
 
 
@@ -181,6 +183,77 @@ float Polygon :: dis2(const pair_2f & p1, const pair_2f & p2) {
     float tmp_x = p1.first - p2.first,
           tmp_y = p1.second - p2.second;
     return tmp_x * tmp_x + tmp_y * tmp_y;
+}
+
+
+typedef std::vector<std::queue<int>> MaskGroups; // int coressponds to an index
+
+
+std::queue<int> Polygon :: bfs(const vec_b & vis, const int & idx, const int & n) {
+    std::queue<int> q;
+    q.push(idx);
+    static auto one_iter = [&](const int & i){
+        if (!vis[i] &&
+            dis2(vec_polyarea[i] -> getC(), vec_polyarea[idx] -> getC()) < MASKDISTANCE)
+        {
+            q.push(i);
+        }
+    };
+    while (!q.empty()) {
+        int i = q.top();
+        q.pop();
+        if (!vis[i]) {
+            vis[i] = true;
+            for (int j = 0; j < i; ++j) one_iter(i);
+            for (int j = i + 1; j < n; ++j) one_iter(i);
+        }
+    }
+    return q;
+}
+
+
+void mergeGroups (std::queue<int> & group) {
+    int idx1 = group.front(), idx2;
+    group.pop();
+    while ( !group.empty() ) {
+        idx2 = group.front(), group.pop();
+        mergeMasks(idx2, idx1); // this order makes second cloud a new one
+                                // prevents the queue ordering: connect 1. with 2., [new] 2. with 3., ...
+        idx1 = std::move(idx2);
+    }
+}
+
+
+void connectMasks () {
+    /*
+     * method to connect all masks that are in valid distance
+     * in respect to each other ("closely related masks")
+     *
+     * 1. get one group of "closely related masks"
+     * (iterate over all left masks using standard bfs approach
+     * and store a group in a queue)
+     *
+     * this creates a: vector of queues
+     *
+     * 2. for each group merge then using "mergeMasks" method
+     * */
+
+    MaskGroups maskGroups;
+    int n = vec_polyarea.size();
+    vec_b vis (n);
+
+    // --- 1. ---
+    for (int i = 0; i < n; ++i) {
+        if (!vis[i]) {
+            std::queue<int> tmp = bfs(vis, i, n);
+            if (!tmp.empty()) maskGroups.push_back(tmp);
+        }
+    }
+
+    // --- 2. ---
+    int n_groups = maskGroups.size();
+    for (int i = 0; i < n_groups; ++i)
+        mergeGroup(maskGroups[i]);
 }
 
 
