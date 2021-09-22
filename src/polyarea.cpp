@@ -1,5 +1,6 @@
 #include "../headers/polyarea.hpp"
 
+
 PolyArea :: PolyArea(const vec_i & x, const vec_i & y) : x(x), y(y) {
     n_x = n_y = x.size();
     CalculateArea();
@@ -28,4 +29,14 @@ float PolyArea :: count_one_cord (const vec_i & __x) {
 pair_2f PolyArea :: center() {
     return {count_one_cord(x),
             count_one_cord(y)};
+}
+
+
+void PolyArea :: setC (const pair_2f & C) {
+    this -> C = C;
+}
+
+
+pair_2f PolyArea :: getC() {
+    return C;
 }

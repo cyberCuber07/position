@@ -7,7 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
-
+#include "../headers/util.hpp"
 
 /*
  * this module processes given image as 2d matrix
@@ -19,16 +19,16 @@
  *      save2file
  * */
 
-
+using namespace Types;
 using std::vector;
 using std::pair;
 using std::queue;
 
-typedef vector<vector<bool>> vec_2d_b;
-typedef vector<vector<pair<int,int>>> vec_2d_p2i;
-typedef vector<vector<int>> vec_2d_i;
-typedef vector<pair<int,int>> vec_p2i;
-typedef std::vector<std::pair<float,float>> vec_p2f;
+// typedef vector<vector<bool>> vec_2d_b;
+// typedef vector<vector<pair<int,int>>> vec_2d_p2i;
+// typedef vector<vector<int>> vec_2d_i;
+// typedef vector<pair<int,int>> vec_p2i;
+// typedef std::vector<std::pair<float,float>> vec_p2f;
 
 
 void print_vec(const vec_2d_p2i &);

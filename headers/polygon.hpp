@@ -7,9 +7,10 @@
 #include <opencv2/highgui.hpp>
 #include "shapes.hpp"
 #include "polyarea.hpp"
+#include "../headers/util.hpp"
 
-typedef std::vector<std::vector<bool>> vec_2d_b;
-typedef std::vector<PolyArea*> vec_PolyArea;
+// typedef std::vector<std::vector<bool>> vec_2d_b;
+// typedef std::vector<PolyArea*> vec_PolyArea;
 
 /*
  * this module reads an image
@@ -21,6 +22,10 @@ typedef std::vector<PolyArea*> vec_PolyArea;
  * close each other and connect them
  * */
 
+using namespace Types;
+
+typedef std::vector<PolyArea*> vec_PolyArea;
+
 
 class Polygon{
 private:
@@ -31,10 +36,17 @@ private:
     vec_PolyArea vec_polyarea;
 
     cv::Mat read_image();
+    void setMaskDistance(const float &);
+    void setPointMaskDistance(const float &);
+    void connectMasks (const int &, const int &);
+    float dis2(const pair_2f &, const pair_2f &);
+    void rebuildMasks (int &, const int &, int &, int &);
 public:
+    static float MASK_DISTANCE;
+    static float POINT_MASK_DISTANCE;
     Polygon (const std::string &);
     ~ Polygon();
-    vec_p2f get_all_centers();
+    void get_all_centers();
     vec_i sameMasks(const int &);
 };
 
