@@ -58,7 +58,45 @@ void Polygon :: get_all_centers() {
 }
 
 
+Types::FixedQueue<float,2> Polygon :: createFixedQueue () {
+    Types::FixedQueue<float,2> d;
+    d.push(1e9);
+    d.push(1e9);
+    return d;
+}
+
+
 void Polygon :: connectMasks (const int & main_idx, const int & idx) {
+    /*
+     * iterate over masks' chains to find two closest pairs of connections (if any)
+     *
+     * first: calculate distances and put them into fixed size queue
+     *        in respect to their distance's (get's two smallest pairs)
+     *
+     * second: connect two chains into one
+     *
+     * third (optional -- here or in outside function) : remove one of the objects
+     *
+     * */
+    Types::FixedQueue<float,2> q = createFixedQueue();
+    vec_i x_main = vec_polyarea[main_idx] -> x,
+          y_main = vec_polyarea[main_idx] -> y,
+          x_idx = vec_polyarea[idx] -> x,
+          y_idx = vec_polyarea[idx] -> y,
+
+    // first
+    int n1 = x_main.size(), n2 = x_idx.size();
+    for (int i = 0; i < n1; ++i) {
+        for (int j = 0; j < n2; ++j) {
+            float curr_dis = q.front(),
+                  tmp_dis = dis2(std::make_pair(x_main[i], y_main[i]), std::make_pair(x_idx[j], y_idx[j]));
+            if (curr_dis > tmp_dis) {
+                q.push(tmp_dis); // TODO: change to std::make_pair(tmp_dis, std::make_pair(i, j))
+            }
+        }
+    }
+
+    // second
 }
 
 
@@ -103,8 +141,9 @@ vec_i Polygon :: sameMasks(const int & idx) {
              *
              * after: call method to earse idx's vec_polyarea object and change index (j in main loop) if necessary
              * */
-            connectMasks(i, idx);
-            rebuildMasks(i, idx, j, n);
+            if (connectMasks(i, idx))
+                rebuildMasks(i, idx, j, n);
+            // else :: no need to rebuild as chains have not been modified
         }
     };
 

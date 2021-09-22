@@ -25,6 +25,7 @@
 using namespace Types;
 
 typedef std::vector<PolyArea*> vec_PolyArea;
+typedef std::pair<float,std::pair<int,int>> DisIdxs; // data type to store distance and indexes of each chains point
 
 
 class Polygon{
@@ -41,6 +42,7 @@ private:
     void connectMasks (const int &, const int &);
     float dis2(const pair_2f &, const pair_2f &);
     void rebuildMasks (int &, const int &, int &, int &);
+    Types::FixedQueue<float,2> createFixedQueue ();
 public:
     static float MASK_DISTANCE;
     static float POINT_MASK_DISTANCE;

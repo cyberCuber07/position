@@ -14,6 +14,19 @@ namespace Types{
     typedef std::vector<int> vec_i;
     typedef std::pair<float,float> pair_2f;
 
+    template <typename T, int MaxLen, typename Container=std::deque<T>>
+    class FixedQueue : public std::queue<T, Container> {
+    public:
+        void push (const T & value) {
+            // TODO: add automatic sorting -> check if second is smaller / greater
+            //       add complex type :: typedef std::pair<float, std::pair<int,int>> DisIdxs
+            if (this -> size() == MaxLen) {
+                this -> c.pop_front();
+            }
+            std::queue<T, Container> :: push (value);
+        }
+    };
+
 }
 
 #endif
