@@ -5,7 +5,7 @@
 #include <queue>
 #include <vector>
 #include <string>
-#include <opencv2/highgui.hpp>
+#include <opencv2/highgui.hpp> // TODO: for now have been redundant
 #include "shapes.hpp"
 #include "polyarea.hpp"
 #include "../headers/util.hpp"
@@ -25,8 +25,8 @@
 
 using namespace Types;
 
+typedef std::vector<bool> vec_b;
 typedef std::vector<PolyArea*> vec_PolyArea;
-typedef std::pair<float,std::pair<int,int>> DisIdxs; // data type to store distance and indexes of each chains point
 
 
 class Polygon{
@@ -44,14 +44,19 @@ private:
     float dis2(const pair_2f &, const pair_2f &);
     void rebuildMasks (int &, const int &, int &, int &);
     Types::FixedQueue<float,2> createFixedQueue ();
-    std::queue<int> bfs(const vec_b &, const int &, const int &);
+    std::queue<int> bfs(vec_b &, const int &, const int &);
+    void mergeGroup (std::queue<int> & group);
+    void shift_array (const int &, const int &, const int &, const int &);
+    void sort_idx (int &, int &);
 public:
-    static float MASK_DISTANCE;
-    static float POINT_MASK_DISTANCE;
+    float MASK_DISTANCE;
+    float POINT_MASK_DISTANCE;
     Polygon (const std::string &);
     ~ Polygon();
     void get_all_centers();
     vec_i sameMasks(const int &);
+    void connectMasks ();
+    vec_PolyArea getVecPolyArea();
 };
 
 #endif

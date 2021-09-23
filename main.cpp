@@ -4,6 +4,16 @@
 #include <iostream>
 
 
+void test(Polygon * polygon) {
+    int cnt = 0;
+    for (auto tmp : polygon -> getVecPolyArea()) {
+        ++cnt;
+        std::cout << cnt << ": " << tmp -> getC().first << " " << tmp -> getC().second << "\n";
+    }
+    std::cout << "\n";
+}
+
+
 int main(int argc, char **argv)
 {
     std::string file_path = argv[1];
@@ -13,6 +23,10 @@ int main(int argc, char **argv)
     }
 
     Polygon * polygon = new Polygon(file_path);
+
+    polygon -> connectMasks();
+
+    // test(polygon);
 
     delete polygon;
 }

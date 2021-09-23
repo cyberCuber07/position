@@ -5,6 +5,10 @@
 #include <vector>
 #include "../headers/util.hpp"
 
+/*
+ * operations in this module are based on this webpage: https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
+ * */
+
 // typedef std::vector<int> vec_i;
 // typedef std::pair<float,float> pair_2f;
 
