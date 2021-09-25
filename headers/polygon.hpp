@@ -8,8 +8,6 @@
 #include "polyarea.hpp"
 #include "../headers/util.hpp"
 
-// typedef std::vector<std::vector<bool>> vec_2d_b;
-// typedef std::vector<PolyArea*> vec_PolyArea;
 
 /*
  * this module reads an image
@@ -39,7 +37,6 @@ private:
     void setMaskDistance(const float &);
     void setPointMaskDistance(const float &);
     void mergeMasks (const int &, const int &);
-    float dis2(const pair_2f &, const pair_2f &);
     void rebuildMasks (int &, const int &, int &, int &);
     std::queue<int> bfs(vec_b &, const int &, const int &);
     void mergeGroup (std::queue<int> & group);

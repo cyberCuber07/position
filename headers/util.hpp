@@ -61,12 +61,18 @@ private:
 };
 
 
+
 template <typename T>
 void switchValues(T & a, T & b) {
     T tmp = std::move(a);
     a = std::move(b);
     b = std::move(tmp);
 }
+
+
+float dis2(const Types::pair_2f &, const Types::pair_2f &);
+
+float dis2(const int &, const int &);
 
 
 #endif

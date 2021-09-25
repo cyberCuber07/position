@@ -146,8 +146,8 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
     for (int i = 0; i < n1; ++i) {
         for (int j = 0; j < n2; ++j) {
             float curr_dis = q.front().first, // get distance value
-                  tmp_dis = dis2(std::make_pair(vec_polyarea[main_idx] -> x[i], vec_polyarea[main_idx] -> y[i]),
-                                 std::make_pair(vec_polyarea[idx] -> x[i], vec_polyarea[idx] -> y[i]));
+                  tmp_dis = dis2(vec_polyarea[main_idx] -> x[i] - vec_polyarea[idx] -> x[i],
+                                 vec_polyarea[main_idx] -> y[i] - vec_polyarea[idx] -> y[i]);
             if (tmp_dis < curr_dis) {
                 q.push(tmp_dis, i, j);
             }
@@ -190,8 +190,6 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
     shift_array(main_idx, start_1, end_1, n1);
     shift_array(idx, start_2, end_2, n2);
 
-    // std::cout << vec_polyarea[main_idx] -> y.size() << "\n";
-
     // --- 2. ---
     // rewrite elements from chain_2 to chain_1
     int n_chain_2 = vec_polyarea[idx] -> x.size();
@@ -207,16 +205,6 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
     // third
     // TODO: delete chain_2 vec_polyarea object
     // vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
-}
-
-
-float Polygon :: dis2(const pair_2f & p1, const pair_2f & p2) {
-    /*
-     * counts dis squared (^2)
-     * */
-    float tmp_x = p1.first - p2.first,
-          tmp_y = p1.second - p2.second;
-    return tmp_x * tmp_x + tmp_y * tmp_y;
 }
 
 

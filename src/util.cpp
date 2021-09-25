@@ -25,3 +25,24 @@ bool SelfCross :: selfIntersect () {
 bool SelfCross :: ccw (const Types::pair_2i & pa, const Types::pair_2i & pb, const Types::pair_2i & pc) {
     return (pc.second - pa.second) * (pb.first - pa.first) > (pb.second - pa.second) * (pc.first - pa.first);
 }
+
+
+
+// --------------------------------------------------------------------------------------------------------------------------------
+
+float dis2(const Types::pair_2f & p1, const Types::pair_2f & p2) {
+    /*
+     * counts dis squared (^2)
+     * */
+    float tmp_x = p1.first - p2.first,
+          tmp_y = p1.second - p2.second;
+    return tmp_x * tmp_x + tmp_y * tmp_y;
+}
+
+
+float dis2(const int & tmp_x, const int & tmp_y) {
+    /*
+     * counts dis squared (^2)
+     * */
+    return tmp_x * tmp_x + tmp_y * tmp_y;
+}
