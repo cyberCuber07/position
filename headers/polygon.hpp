@@ -32,11 +32,12 @@ private:
     cv::Mat image;
     vec_2d_p2i shapes;
     vec_PolyArea vec_polyarea;
+    vec_i deleted;
 
     cv::Mat read_image();
     void setMaskDistance(const float &);
     void setPointMaskDistance(const float &);
-    void mergeMasks (const int &, const int &);
+    void mergeMasks (int &, int &);
     void rebuildMasks (int &, const int &, int &, int &);
     std::queue<int> bfs(vec_b &, const int &, const int &);
     void mergeGroup (std::queue<int> & group);
@@ -51,6 +52,7 @@ public:
     vec_i sameMasks(const int &);
     void connectMasks ();
     vec_PolyArea getVecPolyArea();
+    void updateIndex(int &);
 };
 
 #endif

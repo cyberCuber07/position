@@ -124,7 +124,14 @@ void Polygon :: sort_idx (int & idx1, int & idx2) {
 }
 
 
-void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
+void Polygon :: updateIndex(int & idx) {
+    int cnt = 0;
+    for (int x : deleted) if (x < idx) ++cnt;
+    idx -= cnt;
+}
+
+
+void Polygon :: mergeMasks (int & main_idx, int & idx) {
     /*
      * iterate over masks' chains to find two closest pairs of connections (if any)
      *
@@ -139,6 +146,19 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
      *
      * TODO: consider changing lamdas to standard methods
      * */
+
+
+    /*
+     * STEP 0:
+     *          Before preceding to alg,
+     *          first preprocess indexes
+     * */
+
+    int tmp_idx = idx; // make a copy
+    updateIndex(main_idx);
+    updateIndex(idx);
+
+
     Types::FixedQueue<float,2> q = Types::FixedQueue<float,2>().createFixedQueue();
 
     // first
@@ -204,7 +224,9 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
  
     // third
     // TODO: delete chain_2 vec_polyarea object
-    // vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
+    std::cout << "size of vec_polyarea: " << vec_polyarea.size() << "\n";
+    vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
+    deleted.push_back(tmp_idx);
 }
 
 
@@ -304,12 +326,12 @@ void Polygon :: mergeGroup (std::queue<int> & group) {
         idx2 = group.front();
         group.pop();
 
-        std::cout << idx1 << " " << idx2 << "\n";
+        // std::cout << idx1 << " " << idx2 << "\n";
 
         /* MAIN CODE */
         // __________________________________________________________
         
-        // mergeMasks(idx1, idx2);
+        mergeMasks(idx1, idx2);
         
         std::cout << "idx_1_n: " << vec_polyarea[idx1] -> x.size() <<
                    ", idx_2_n: " << vec_polyarea[idx2] -> y.size() << "\n";
@@ -350,6 +372,7 @@ void Polygon :: connectMasks () {
     }
 
     // --- 2. ---
+    std::cout << "Number of masks: " << maskGroups.size() << "\n\n";
     std::cout << "Max number: " << vec_polyarea.size() << "\n";
     int cnt = 0;
     for (auto group : maskGroups) {
@@ -359,6 +382,7 @@ void Polygon :: connectMasks () {
         std::cout << "Group's finished\n\n";
     }
     std::cout << cnt << "\n";
+    std::cout << "Number of masks: " << vec_polyarea.size() << "\n";
 }
 
 
