@@ -172,8 +172,15 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
      * getting rid of self intersection
      * NOTICE: this total mask's area may increase!!
      * */
-    if (SelfCross(start_1, end_1, start_2, end_2).selfIntersect())
+    SelfCross selfCross(vec_polyarea[main_idx] -> x[start_1], vec_polyarea[main_idx] -> y[start_1],
+                        vec_polyarea[main_idx] -> x[end_1], vec_polyarea[main_idx] -> y[end_1],
+                        vec_polyarea[idx] -> x[start_2], vec_polyarea[idx] -> y[start_2],
+                        vec_polyarea[idx] -> x[end_2], vec_polyarea[idx] -> y[end_2]);
+    if ( selfCross.selfIntersect() )
+    {
         switchValues(end_1, end_2); // NOTICE: switching lines' ends doesn't change chain's order (chain no.1 is still no.1!!)
+    }
+
     // sort_idx(start_1, end_1);
     // sort_idx(start_2, end_2);
 

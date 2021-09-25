@@ -21,12 +21,13 @@ namespace Types{
     /*
      * in DisIdxs:
      *      float              : distance
-     *      std::pair<int,int> : <chain_1_idx, chain_2_idx>
+     *      std::pair<int,int> : (chain_1_idx, chain_2_idx)
      * */
 
     template <typename T, int MaxLen, typename Container=std::deque<DisIdxs>>
     class FixedQueue : public std::queue<DisIdxs, Container> {
     public:
+ 
         void push (const T & value, const int & idx1, const int & idx2) {
             // TODO: add automatic sorting -> check if second is smaller / greater
             //       add complex type :: typedef std::pair<float, std::pair<int,int>> DisIdxs
@@ -35,15 +36,13 @@ namespace Types{
             }
             std::queue<DisIdxs, Container> :: push (std::make_pair(value, std::make_pair(idx1, idx2)));
         }
-        FixedQueue<T, MaxLen> createFixedQueue ();
-    };
 
-    template <typename T, int MaxLen, typename Container>
-    FixedQueue<T, MaxLen> FixedQueue<T, MaxLen, Container> :: createFixedQueue () {
-        FixedQueue<T, MaxLen> d;
-        for (int i = 0; i < MaxLen; ++i) d.push(1e9, -1, -1);
-        return d;
-    }
+        FixedQueue<T, MaxLen> createFixedQueue () {
+            FixedQueue<T, MaxLen> d;
+            for (int i = 0; i < MaxLen; ++i) d.push(1e9, -1, -1);
+            return d;
+        }
+    };
 }
 
 
@@ -52,13 +51,22 @@ public:
     /*
      * methods: "ccw" and "selfIntersect" from: https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
      * */
-    SelfCross (const int &, const int &, const int &, const int &);
-    bool selfIntersect (const Types::pair_2i &, const Types::pair_2i &,
-                        const Types::pair_2i &, const Types::pair_2i &);
+    SelfCross (const int &, const int &, const int &, const int &,
+               const int &, const int &, const int &, const int &);
+    bool selfIntersect ();
 private:
-    Types::pair_2i p1, p2;
+    Types::pair_2i start_1, end_1,
+                   start_2, end_2;
     bool ccw (const Types::pair_2i &, const Types::pair_2i &, const Types::pair_2i &);
 };
+
+
+template <typename T>
+void switchValues(T & a, T & b) {
+    T tmp = std::move(a);
+    a = std::move(b);
+    b = std::move(tmp);
+}
 
 
 #endif
