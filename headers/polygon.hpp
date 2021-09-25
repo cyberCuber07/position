@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <cassert>
 #include <opencv2/highgui.hpp> // TODO: for now have been redundant
 #include "shapes.hpp"
 #include "polyarea.hpp"
@@ -33,6 +34,7 @@ private:
     vec_2d_p2i shapes;
     vec_PolyArea vec_polyarea;
     vec_i deleted;
+    int height, width;
 
     cv::Mat read_image();
     void setMaskDistance(const float &);
@@ -46,13 +48,15 @@ private:
 public:
     float MASK_DISTANCE;
     float POINT_MASK_DISTANCE;
-    Polygon (const std::string &);
+    Polygon (const std::string &, const int &, const int &);
     ~ Polygon();
     void get_all_centers();
     vec_i sameMasks(const int &);
     void connectMasks ();
     vec_PolyArea getVecPolyArea();
     void updateIndex(int &);
+    void updatePolyArea();
+    void createImage();
 };
 
 #endif

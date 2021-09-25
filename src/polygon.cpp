@@ -2,7 +2,6 @@
 #include <iostream>
 #include <algorithm> // for "std::rotate"
 #include <utility> // for "std::move"
-#include <cassert>
 
 
 /*
@@ -35,7 +34,9 @@ void Polygon :: setPointMaskDistance(const float & val=10) {
 }
 
 
-Polygon :: Polygon (const std::string & file_path) : file_path(file_path) {
+Polygon :: Polygon (const std::string & file_path, const int & height, const int & width) : file_path(file_path), height(height), width(width) {
+    assert (height > 0);
+    assert (width > 0);
     setMaskDistance();
     setPointMaskDistance();
     image = read_image();
@@ -70,10 +71,9 @@ void Polygon :: get_all_centers() {
             y[i] = shapes[k][i].second;
         }
         PolyArea *tmp  = new PolyArea(x, y);
-        pair_2f pair_tmp = tmp -> center();
+        pair_2f pair_tmp = tmp -> getC();
         if (pair_tmp.first != 0 && pair_tmp.second != 0){
-            tmp -> setC(pair_tmp);
-            vec_polyarea.push_back(tmp); // TODO: Get rid of tmp --- memory LEAK !!!
+            vec_polyarea.push_back(std::move(tmp)); // TODO: Get rid of tmp --- memory LEAK !!!
         } else {
             delete tmp;
         }
@@ -357,6 +357,8 @@ void Polygon :: connectMasks () {
      * this creates a: vector of queues
      *
      * 2. for each group merge then using "mergeMasks" method
+     *
+     * 3. udapte values of vec_polyarea objects
      * */
 
     MaskGroups maskGroups;
@@ -383,9 +385,39 @@ void Polygon :: connectMasks () {
     }
     std::cout << cnt << "\n";
     std::cout << "Number of masks: " << vec_polyarea.size() << "\n";
+
+    updatePolyArea();
+}
+
+
+void Polygon :: updatePolyArea() {
+    const int n = vec_polyarea.size();
+    for (int i = 0; i < n; ++i)
+        vec_polyarea[i] = std::move(new PolyArea(vec_polyarea[i] -> x,
+                                                 vec_polyarea[i] -> y));
 }
 
 
 vec_PolyArea Polygon :: getVecPolyArea() {
     return vec_polyarea;
+}
+
+
+void Polygon :: createImage() {
+    /*
+     * method to create cv::Mat image using vec_polyarea objects
+     * */
+    cv::Mat image = cv::Mat::zeros(cv::Size(height, width), CV_64FC1);
+
+    // modify for each chain
+    // TODO: add cathing errors!!!
+    int n_vec = vec_polyarea.size();
+    for (int i = 0; i < n_vec; ++i) {
+        int n_elements = vec_polyarea[i] -> x.size();
+        for (int k = 0; k < n_elements; ++k)
+            image.at<double>(vec_polyarea[i] -> x[k],
+                             vec_polyarea[i] -> y[k]) = 255;
+    }
+
+    cv::imwrite("data/savedImage.jpg", image);
 }

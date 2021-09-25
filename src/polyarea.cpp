@@ -3,11 +3,12 @@
 
 PolyArea :: PolyArea(const vec_i & x, const vec_i & y) : x(x), y(y) {
     n_x = n_y = x.size();
-    CalculateArea();
+    calculateArea();
+    calculateCenter();
 }
 
 
-void PolyArea :: CalculateArea() {
+void PolyArea :: calculateArea() {
     // area = (x[n_x - 1] * y[0] - y[n_x - 1] * x[0]);
     area = 0;
     for (int i = 0; i < n_x - 1; ++i)
@@ -26,14 +27,9 @@ float PolyArea :: count_one_cord (const vec_i & __x) {
 }
 
 
-pair_2f PolyArea :: center() {
-    return {count_one_cord(x),
-            count_one_cord(y)};
-}
-
-
-void PolyArea :: setC (const pair_2f & C) {
-    this -> C = C;
+void PolyArea :: calculateCenter() {
+    C = std::make_pair(count_one_cord(x),
+                       count_one_cord(y));
 }
 
 

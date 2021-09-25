@@ -22,11 +22,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    Polygon * polygon = new Polygon(file_path);
+    Polygon * polygon = new Polygon(file_path, 416, 416);
 
     polygon -> connectMasks();
 
-    // test(polygon);
+    test(polygon);
+
+    polygon -> createImage();
 
     delete polygon;
 }
