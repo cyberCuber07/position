@@ -2,10 +2,27 @@
 #include <iostream>
 #include <algorithm> // for "std::rotate"
 #include <utility> // for "std::move"
-#include <vector>
+#include <cassert>
 
 
-void Polygon :: setMaskDistance(const float & val=400) { /* consider changing --- 
+/*
+ * BUGS:
+ *      1. indexes instead of cords in "mergeMasks"
+ *      2. give indexes instead of cords in "rotate"
+ *
+ * Rewrite:
+ *      "mergeMasks"
+ *      "mergeGroup"
+ * */
+
+
+void print_vec(const vec_i & vec) {
+    for (int x : vec) std::cout << x << " ";
+    std::cout << "\n";
+}
+
+
+void Polygon :: setMaskDistance(const float & val=100) { /* consider changing --- 
                                                             depending on the size of the images
                                                             (CAUTION:: make sure all image are one size only!!)
                                                           */
@@ -64,36 +81,29 @@ void Polygon :: get_all_centers() {
 }
 
 
-Types::FixedQueue<float,2> Polygon :: createFixedQueue () {
-    Types::FixedQueue<float,2> d;
-    d.push(1e9, -1, -1);
-    d.push(1e9, -1, -1);
-    return d;
-}
-
-
-void Polygon :: shift_array (const int & type_idx, const int & chain_idx1, const int & chain_idx2, const int & n) {
+void Polygon :: shift_array (const int & type_idx, const int & start, const int & end, const int & n) {
     /*
      * %%% util method for mergeGroup method %%%
      *
      * chain_idx := {main_idx, idx}
      * */
-    int shift_val = chain_idx2 + 1;
-    // rotations
-    // x cord
-    std::rotate(vec_polyarea[type_idx] -> x.begin(),
-                vec_polyarea[type_idx] -> x.begin() + shift_val,
-                vec_polyarea[type_idx] -> x.end());
-    // y cord
-    std::rotate(vec_polyarea[type_idx] -> y.begin(),
-                vec_polyarea[type_idx] -> y.begin() + shift_val,
-                vec_polyarea[type_idx] -> y.end());
     
+    const int shift_val = end + 1;
+ 
     // get rid of middle elements --- connecting two chains makes middle parts useless
-    for (int i = 0; i < chain_idx2 - chain_idx1 + 1; ++i) {
-        vec_polyarea[type_idx] -> x.pop_back();
-        vec_polyarea[type_idx] -> y.pop_back();
-    }
+    int n_iter = end - start + 1;
+    assert (n_iter > 0);
+
+    static auto singleRotation = [&](vec_i & vec){
+        std::rotate(vec.begin(), vec.begin() + shift_val, vec.end());
+        for (int i = 0; i < n_iter; ++i)
+            vec.pop_back();
+    };
+
+    // x cord
+    singleRotation(vec_polyarea[type_idx] -> x);
+    // y cord
+    singleRotation(vec_polyarea[type_idx] -> y);
 }
 
 
@@ -118,7 +128,8 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
     /*
      * iterate over masks' chains to find two closest pairs of connections (if any)
      *
-     * first: calculate distances and put them into fixed size queue
+     * first: find best connection
+     *        calculate distances and put them into fixed size queue
      *        in respect to their distance's (get's two smallest pairs)
      *        (iteration over every point cloud's point)
      *
@@ -128,19 +139,16 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
      *
      * TODO: consider changing lamdas to standard methods
      * */
-    Types::FixedQueue<float,2> q = createFixedQueue();
-    vec_i x_main = vec_polyarea[main_idx] -> x,
-          y_main = vec_polyarea[main_idx] -> y,
-          x_idx = vec_polyarea[idx] -> x,
-          y_idx = vec_polyarea[idx] -> y;
+    Types::FixedQueue<float,2> q = Types::FixedQueue<float,2>().createFixedQueue();
 
     // first
-    const int n1 = x_main.size(), n2 = x_idx.size();
+    const int n1 = vec_polyarea[main_idx] -> x.size(), n2 = vec_polyarea[idx] -> x.size();
     for (int i = 0; i < n1; ++i) {
         for (int j = 0; j < n2; ++j) {
             float curr_dis = q.front().first, // get distance value
-                  tmp_dis = dis2(std::make_pair(x_main[i], y_main[i]), std::make_pair(x_idx[j], y_idx[j]));
-            if (curr_dis > tmp_dis) {
+                  tmp_dis = dis2(std::make_pair(vec_polyarea[main_idx] -> x[i], vec_polyarea[main_idx] -> y[i]),
+                                 std::make_pair(vec_polyarea[idx] -> x[i], vec_polyarea[idx] -> y[i]));
+            if (tmp_dis < curr_dis) {
                 q.push(tmp_dis, i, j);
             }
         }
@@ -152,31 +160,43 @@ void Polygon :: mergeMasks (const int & main_idx, const int & idx) {
      * 2. rewrite values from one chain to another
      * 3. delete object of not changed chain
      * */
-    int chain_1_idx1 = q.front().second.first,
-        chain_2_idx1 = q.front().second.second;
+    int start_1 = q.front().second.first,
+        start_2 = q.front().second.second;
     q.pop();
-    int chain_1_idx2 = q.front().second.first,
-        chain_2_idx2 = q.front().second.second;
+    int end_1 = q.front().second.first,
+        end_2 = q.front().second.second;
     q.pop();
  
-    // first preprocess indexes   
-    sort_idx(chain_1_idx1, chain_1_idx2);
-    sort_idx(chain_2_idx1, chain_2_idx2);
+    // first preprocess indexes
+    /*
+     * getting rid of self intersection
+     * NOTICE: this total mask's area may increase!!
+     * */
+    if (SelfCross(start_1, end_1, start_2, end_2).selfIntersect())
+        switchValues(end_1, end_2); // NOTICE: switching lines' ends doesn't change chain's order (chain no.1 is still no.1!!)
+    // sort_idx(start_1, end_1);
+    // sort_idx(start_2, end_2);
+
+    std::cout << "cords: " << start_1 << "," << end_1 << " " << start_2 << "," << end_2 << "\n";
 
     // --- 1. ---
-    shift_array(main_idx, chain_1_idx1, chain_1_idx2, n1);
-    shift_array(idx, chain_2_idx1, chain_2_idx2, n2);
+    shift_array(main_idx, start_1, end_1, n1);
+    shift_array(idx, start_2, end_2, n2);
+
+    // std::cout << vec_polyarea[main_idx] -> y.size() << "\n";
 
     // --- 2. ---
     // rewrite elements from chain_2 to chain_1
     int n_chain_2 = vec_polyarea[idx] -> x.size();
-    for (int i = 0; i < n_chain_2; ++i) {
+    std::cout << "n_chain_2: " << n_chain_2 << "\n";
+    while(n_chain_2--) { // this order connects end to end and head to head
         // x cord
-        vec_polyarea[main_idx] -> x.push_back(vec_polyarea[idx] -> x[i]);
+        vec_polyarea[main_idx] -> x.push_back(vec_polyarea[idx] -> x[n_chain_2]);
         // y cord
-        vec_polyarea[main_idx] -> y.push_back(vec_polyarea[idx] -> y[i]);
+        vec_polyarea[main_idx] -> y.push_back(vec_polyarea[idx] -> y[n_chain_2]);
     }
-    
+    std::cout << vec_polyarea[main_idx] -> y.size() << "\n";
+ 
     // third
     // TODO: delete chain_2 vec_polyarea object
     // vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
@@ -203,8 +223,10 @@ std::queue<int> Polygon :: bfs(vec_b & vis, const int & idx, const int & n) {
 
     static auto one_iter = [&](const int & k){
         if (!vis[k] &&
-            dis2(vec_polyarea[k] -> getC(), vec_polyarea[idx] -> getC()) < Polygon::MASK_DISTANCE)
+            dis2(vec_polyarea[k] -> getC(), vec_polyarea[idx] -> getC()) < Polygon::MASK_DISTANCE &&
+            vec_polyarea[k] -> x.size() >= 10)
         {
+            std::cout << "vec_polyarea[" << k << "]: " << vec_polyarea[k] -> x.size() << "\n";
             q.push(k);
             vis[k] = true;
         }
@@ -222,55 +244,88 @@ std::queue<int> Polygon :: bfs(vec_b & vis, const int & idx, const int & n) {
 }
 
 
+// void Polygon :: mergeGroup (std::queue<int> & group) {
+//     int idx1 = group.front(), idx2;
+//     group.pop();
+//     vector<int> used; /* NOTICE
+//                          consider: indexes := {1, 2, 3}
+//                             1. mergeMasks (1, 2), 
+//                             2. erase 1.
+//                             indexs = {2, 3} // element's "3" index := 1, not 2
+//                             ...
+// 
+//       example:
+//           1 2 3 4 -> I. {1, 2}, II. {2, 3} -> [-1] {1, 2}, III. {3, 4} -> [-2] {1, 2}
+//           ------------------------------------------------------------------------------------
+//                          since idexes will not necesserily be sorted,
+//                          then use a vector / list to store and
+//                          check if index in vector should be changed
+// 
+//                          *** downgrading elements should be in respect to those erased ***
+//                        */
+// 
+//     static auto stepDown = [&](int & idx){
+//         /*
+//          * lambda used to decrease indexes based on NOTICE to "used" vector
+//          * */
+//         int cnt = 0;
+//         for (int x : used)
+//             if (x < idx)
+//                 ++cnt;
+//         idx -= cnt;
+//     };
+// 
+//     while ( !group.empty() ) {
+//         idx2 = group.front();
+//         group.pop();
+// 
+//         // stepDown(idx1);
+//         // stepDown(idx2);
+//         
+//         mergeMasks(idx2, idx1); // this order makes second cloud a new one
+//                                 // prevents the queue ordering: connect 1. with 2., [new] 2. with 3., ...
+//  
+//         std::cout << idx1 << " " << idx2 << "\n";
+//  
+//         // delete idx1 mask
+//         // vec_polyarea.erase(vec_polyarea.begin() + idx1);
+// 
+//         // next iteration
+//         used.push_back(idx1);
+//         idx1 = std::move(idx2);
+// 
+//         // print_vec(vec_polyarea[idx2] -> x);
+//     }
+// }
+
+
 void Polygon :: mergeGroup (std::queue<int> & group) {
+    /*
+     * method to iterate over a group and connect all masks to one
+     * */
     int idx1 = group.front(), idx2;
     group.pop();
-    vector<int> used; /* NOTICE
-                         consider: indexes := {1, 2, 3}
-                            1. mergeMasks (1, 2), 
-                            2. erase 1.
-                            indexs = {2, 3} // element's "3" index := 1, not 2
-                            ...
-                         since idexes will not necesserily be sorted,
-                         then use a vector / list to store and
-                         check if index in vector should be changed
-
-                         *** downgrading elements should be in respect to those erased ***
-                       */
-
-    static auto stepDown = [&](int & idx){
-        /*
-         * lambda used to decrease indexes based on NOTICE to "used" vector
-         * */
-        int cnt = 0;
-        for (int x : used)
-            if (x < idx)
-                ++cnt;
-        idx -= cnt;
-    };
-
-    while ( !group.empty() ) {
+    while (!group.empty()) {
         idx2 = group.front();
         group.pop();
 
-        stepDown(idx1);
-        stepDown(idx2);
-        
-        mergeMasks(idx2, idx1); // this order makes second cloud a new one
-                                // prevents the queue ordering: connect 1. with 2., [new] 2. with 3., ...
- 
         std::cout << idx1 << " " << idx2 << "\n";
- 
-        // delete idx1 mask
-        vec_polyarea.erase(vec_polyarea.begin() + idx1);
 
-        // next iteration
-        used.push_back(idx1);
+        /* MAIN CODE */
+        // __________________________________________________________
+        
+        // mergeMasks(idx1, idx2);
+        
+        std::cout << "idx_1_n: " << vec_polyarea[idx1] -> x.size() <<
+                   ", idx_2_n: " << vec_polyarea[idx2] -> y.size() << "\n";
+
+        // __________________________________________________________
+
         idx1 = std::move(idx2);
+
+        std::cout << "\n";
     }
 }
-
-// 1 2 3 4 -> I. {1, 2}, II. {2, 3} -> [-1] {1, 2}, III. {3, 4} -> [-2] {1, 2}
 
 
 void Polygon :: connectMasks () {
@@ -300,55 +355,18 @@ void Polygon :: connectMasks () {
     }
 
     // --- 2. ---
-    for (auto group : maskGroups)
+    std::cout << "Max number: " << vec_polyarea.size() << "\n";
+    int cnt = 0;
+    for (auto group : maskGroups) {
+        std::cout << "Group's size: " << group.size() << "\n";
+        cnt += group.size();
         mergeGroup(group);
+        std::cout << "Group's finished\n\n";
+    }
+    std::cout << cnt << "\n";
 }
 
 
 vec_PolyArea Polygon :: getVecPolyArea() {
     return vec_polyarea;
 }
-
-
-// TODO: probably not needed --- may be deleted
-// void Polygon :: rebuildMasks (int & main_idx, const int & idx, int & j, int & n) {
-//     /*
-//      * earse vec_polyarea's object with index "idx"
-//      * change "j" index if main_idx < idx
-//      * */
-//     vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: check if correct
-//     if (main_idx < idx) {
-//         --main_idx;
-//     } else {
-//         --j; // TODO: check if correct
-//     }
-//     --n; // for both cases ??
-// }
-// vec_i Polygon :: sameMasks(const int & idx) {
-//     /*
-//      * method to find enougly close masks to the given one
-//      *
-//      * retult: vector of objects' [vec_polyarea] indexes [int]
-//      * */
-//     int n = vec_polyarea.size(), j, i;
-//     
-//     auto one_loop_iter = [&](const int & idx, const pair_2f & tmp_i){
-//         pair_2f tmp = vec_polyarea[idx] -> getC(); // TODO: consider moving to if's dis2 directly
-//         if (dis2(tmp, tmp_i) < MASK_DISTANCE) {
-//             /*
-//              * first: call the connecting two masks method
-//              *
-//              * after: call method to earse idx's vec_polyarea object and change index (j in main loop) if necessary
-//              * */
-//             connectMasks(i, idx);
-//             rebuildMasks(i, idx, j, n);
-//             // else :: no need to rebuild as chains have not been modified
-//         }
-//     };
-// 
-//     for (i = 0; i < n; ++i) {
-//         pair_2f tmp_i = vec_polyarea[i] -> getC();
-//         for (j = 0; j < i; ++j) one_loop_iter(j, tmp_i);
-//         for (j = i + 1; j < n; ++j) one_loop_iter(j, tmp_i);
-//     }
-// }

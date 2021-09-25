@@ -2,8 +2,6 @@
 #define __POLYGON_HPP_
 
 
-#include <queue>
-#include <vector>
 #include <string>
 #include <opencv2/highgui.hpp> // TODO: for now have been redundant
 #include "shapes.hpp"
@@ -43,7 +41,6 @@ private:
     void mergeMasks (const int &, const int &);
     float dis2(const pair_2f &, const pair_2f &);
     void rebuildMasks (int &, const int &, int &, int &);
-    Types::FixedQueue<float,2> createFixedQueue ();
     std::queue<int> bfs(vec_b &, const int &, const int &);
     void mergeGroup (std::queue<int> & group);
     void shift_array (const int &, const int &, const int &, const int &);
