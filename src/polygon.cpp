@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm> // for "std::rotate"
 #include <utility> // for "std::move"
+#include <fstream>
+#include <string>
 
 
 /*
@@ -14,6 +16,12 @@
  *      "mergeGroup"
  * */
 
+/*
+ * TODO:
+ *      Consider modyfing "x" and "y" vector ("vec_i") to vector pair ("vec_pi")
+ *      or some kind of easier accessibility container... (enum, vector, etc.)
+ * */
+
 
 void print_vec(const vec_i & vec) {
     for (int x : vec) std::cout << x << " ";
@@ -21,7 +29,7 @@ void print_vec(const vec_i & vec) {
 }
 
 
-void Polygon :: setMaskDistance(const float & val=100) { /* consider changing --- 
+void Polygon :: setMaskDistance(const float & val=200) { /* consider changing --- 
                                                             depending on the size of the images
                                                             (CAUTION:: make sure all image are one size only!!)
                                                           */
@@ -131,6 +139,44 @@ void Polygon :: updateIndex(int & idx) {
 }
 
 
+// void Polygon :: addConnection(const int & main_idx, const int & idx,
+//                               const int & start_1, const int & end_1,
+//                               const int & start_2, const int & end_2) {
+//     /*
+//      * method to add connection points to second chain in "mergeMasks"
+//      *
+//      * first: calculate number of points that should be added,
+//      *        based on the distance of two chains' connection points
+//      *        (for each pair ("start", "end") seperatly)
+//      *
+//      * second: add points to a second chain (denoted by "idx" variable)
+//      * */
+//     
+//     // -- first --
+//     static auto max_val = [&](const int & start, const int & end) {
+//         const int n_x = abs(vec_polyarea[main_idx] -> x[start] - vec_polyarea[idx] -> x[end]) - 1,
+//                   n_y = abs(vec_polyarea[main_idx] -> y[start] - vec_polyarea[idx] -> y[end]) - 1;
+//         if (n_x > n_y && n_x > 3) {
+//             const int l_y = n_x / n_y;
+//             vec_i x_points (n_x);
+//             vec_i y_points (n_x, vec_polyarea[);
+//             for (int i = 0; i < 
+//         } else if (n_y > n_x & n_y > 3) {
+//         } else if (n_x > 3 && n_y > 3){ // "n_x == n_y"
+//         }
+//     };
+//     static auto first = [](const vec_i & cord, const int & start, const int & end, const int & n_points) {
+//         // lambda to create vector of points for one coordinate ("x" or "y")
+//         // "const vec_i & cord := {x, y}"
+//         Types::vec_i points (n_points);
+//     };
+// 
+//     // calculate number of points for each connection ("1" and "2")
+//     const int n_1 = max_val(start_1, end_1),
+//               n_2 = max_val(start_2, end_2);
+// }
+
+
 void Polygon :: mergeMasks (int & main_idx, int & idx) {
     /*
      * iterate over masks' chains to find two closest pairs of connections (if any)
@@ -157,6 +203,20 @@ void Polygon :: mergeMasks (int & main_idx, int & idx) {
     int tmp_idx = idx; // make a copy
     updateIndex(main_idx);
     updateIndex(idx);
+
+
+    static auto save2file = [](const vec_i & vec, const std::string & path) {
+        std::ofstream file (path);
+        file << vec.size() << "\n";
+        for (const int & x : vec) file << x << " ";
+        file.close();
+    };
+
+    save2file (vec_polyarea[main_idx] -> x, "data/x");
+    save2file (vec_polyarea[main_idx] -> y, "data/y");
+    // print_vec(vec_polyarea[main_idx] -> x);
+    // std::cout << "----------------------------------------------------------------------------------------\n";
+    // print_vec(vec_polyarea[main_idx] -> y);
 
 
     Types::FixedQueue<float,2> q = Types::FixedQueue<float,2>().createFixedQueue();
@@ -386,6 +446,7 @@ void Polygon :: connectMasks () {
     std::cout << cnt << "\n";
     std::cout << "Number of masks: " << vec_polyarea.size() << "\n";
 
+    // --- UPDATE MASKS ---
     updatePolyArea();
 }
 
@@ -407,16 +468,22 @@ void Polygon :: createImage() {
     /*
      * method to create cv::Mat image using vec_polyarea objects
      * */
-    cv::Mat image = cv::Mat::zeros(cv::Size(height, width), CV_64FC1);
+    cv::Mat image(cv::Size(height, width), CV_8UC3);
 
     // modify for each chain
     // TODO: add cathing errors!!!
     int n_vec = vec_polyarea.size();
     for (int i = 0; i < n_vec; ++i) {
         int n_elements = vec_polyarea[i] -> x.size();
+        const cv::Vec3b color(255 / 6 * (i % 6), 255 / 6 * ((i + 1) % 6), 255 / 6 * ((i + 2) % 6));
         for (int k = 0; k < n_elements; ++k)
-            image.at<double>(vec_polyarea[i] -> x[k],
-                             vec_polyarea[i] -> y[k]) = 255;
+            image.at<cv::Vec3b>(vec_polyarea[i] -> x[k],
+                                vec_polyarea[i] -> y[k]) = color;
+        for (int k = 0; k < 3; ++k)
+            for (int j = 0; j < 3; ++j)
+                image.at<cv::Vec3b>(vec_polyarea[i] -> getC().first + k,
+                                    vec_polyarea[i] -> getC().second + j) = cv::Vec3b(125, 125, 125);
+        std::cout << "Chain's size: " << vec_polyarea[i] -> x.size() << "\n";
     }
 
     cv::imwrite("data/savedImage.jpg", image);
