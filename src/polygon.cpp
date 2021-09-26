@@ -6,14 +6,6 @@
 #include <string>
 
 
-#define ADD_POINTS_M(vec_1, vec_2, numOfElements, start, end) \
-            for (const int & tmp_x : LinSpace::linspace<int,int>( \
-                (vec_1)[(start)], \
-                (vec_2)[(end)], \
-                 (numOfElements) \
-                 )) (vec_1).push_back(tmp_x);
-
-
 /*
  * BUGS:
  *      1. indexes instead of cords in "mergeMasks"
@@ -37,7 +29,7 @@ void print_vec(const vec_i & vec) {
 }
 
 
-void Polygon :: setMaskDistance(const float & val=50) { /* consider changing --- 
+void Polygon :: setMaskDistance(const float & val=100) { /* consider changing --- 
                                                             depending on the size of the images
                                                             (CAUTION:: make sure all image are one size only!!)
                                                           */
@@ -107,7 +99,7 @@ void Polygon :: shift_array (const int & type_idx, const int & start, const int 
     const int shift_val = end + 1;
  
     // get rid of middle elements --- connecting two chains makes middle parts useless
-    int n_iter = end - start + 1;
+    const int n_iter = end - start + 1;
     assert (n_iter > 0);
 
     static auto singleRotation = [&](vec_i & vec){
@@ -150,18 +142,29 @@ void Polygon :: updateIndex(int & idx) {
 Types::FixedQueue<float,2> Polygon :: getQueue(const int & main_idx, const int & idx, const int & n1, const int & n2) {
     Types::FixedQueue<float,2> q = Types::FixedQueue<float,2>().createFixedQueue();
 
-    for (int i = 0; i < n1; ++i) {
-        for (int j = 0; j < n2; ++j) {
+    for (int start = 0; start < n1; ++start) {
+        for (int end = 0; end < n2; ++end) {
             float curr_dis = q.front().first, // get distance value
-                  tmp_dis = dis2(vec_polyarea[main_idx] -> x[i] - vec_polyarea[idx] -> x[j],
-                                 vec_polyarea[main_idx] -> y[i] - vec_polyarea[idx] -> y[j]);
-            if (tmp_dis < curr_dis) {
-                q.push(tmp_dis, i, j);
+                  tmp_dis = dis2(vec_polyarea[main_idx] -> x[start] - vec_polyarea[idx] -> x[end],
+                                 vec_polyarea[main_idx] -> y[start] - vec_polyarea[idx] -> y[end]);
+            if (tmp_dis < curr_dis) { // add area check -> MAXIMIZE IT!!!
+                q.push(tmp_dis, start, end);
             }
         }
     }
-
     return q;
+}
+
+
+std::vector<int> Polygon :: addPoints (Types::vec_i & vec_1, Types::vec_i & vec_2, const int & numOfElements, const int & start, const int & end) {
+    return LinSpace::linspace<int,int>(vec_1[start],
+                                       vec_2[end],
+                                       numOfElements);
+    // std::cout << vec.size() << "\n";
+    // for (const int & tmp : vec)
+    //     std::cout << tmp << " ";
+    //     // vec_1.push_back(tmp);
+    // std::cout << "END\n";
 }
 
 
@@ -205,9 +208,9 @@ void Polygon :: mergeMasks (int & main_idx, int & idx) {
      * 3. delete object of not changed chain
      * */
     int start_1 = q.front().second.first,
-        start_2 = q.front().second.second;
+        end_1 = q.front().second.second;
     q.pop();
-    int end_1 = q.front().second.first,
+    int start_2 = q.front().second.first,
         end_2 = q.front().second.second;
     q.pop();
  
@@ -217,8 +220,8 @@ void Polygon :: mergeMasks (int & main_idx, int & idx) {
      * NOTICE: this total mask's area may increase!!
      * */
     SelfCross selfCross(vec_polyarea[main_idx] -> x[start_1], vec_polyarea[main_idx] -> y[start_1],
-                        vec_polyarea[main_idx] -> x[end_1], vec_polyarea[main_idx] -> y[end_1],
-                        vec_polyarea[idx] -> x[start_2], vec_polyarea[idx] -> y[start_2],
+                        vec_polyarea[idx] -> x[end_1], vec_polyarea[idx] -> y[end_1],
+                        vec_polyarea[main_idx] -> x[start_2], vec_polyarea[main_idx] -> y[start_2],
                         vec_polyarea[idx] -> x[end_2], vec_polyarea[idx] -> y[end_2]);
     if ( selfCross.selfIntersect() )
     {
@@ -228,8 +231,8 @@ void Polygon :: mergeMasks (int & main_idx, int & idx) {
     std::cout << "cords: " << start_1 << "," << end_1 << " " << start_2 << "," << end_2 << "\n";
 
     // --- 1. ---
-    shift_array(main_idx, start_1, end_1, n1);
-    shift_array(idx, start_2, end_2, n2);
+    shift_array(main_idx, start_1, start_2, n1);
+    shift_array(idx, end_1, end_2, n2);
 
     // --- 2. ---
     /* before adding elements from second array (denoted by "idx")
@@ -238,30 +241,30 @@ void Polygon :: mergeMasks (int & main_idx, int & idx) {
        points are added to the first mask (denoted by "main_idx")
        */
 
-     static auto add_points_m = [&](Types::vec_i & vec_1, Types::vec_i & vec_2, const int & numOfElements, const int & start, const int & end) {
-            for (const int & tmp_x : LinSpace::linspace<int,int>(
-                (vec_1)[(start)],
-                (vec_2)[(end)],
-                 (numOfElements)
-                 )) (vec_1).push_back(tmp_x);
-     };
-    
-    static auto addPoints = [&](const int & start, const int & end){
+    static auto add2Vector = [](const std::vector<int> & vec, std::vector<int> & main_vec){
+        for (const int & val : vec) main_vec.push_back(val);
+    };
+
+    static auto modVector = [&](const int & start, const int & end, const int & type_idx){
         const int numOfElements = std::max(abs(vec_polyarea[main_idx] -> x[start] - vec_polyarea[idx] -> x[end]),
                                            abs(vec_polyarea[main_idx] -> y[start] - vec_polyarea[idx] -> y[end]));
 
         std::cout << "NumOfElements: " << numOfElements << "\n";
-        add_points_m(vec_polyarea[main_idx] -> x, vec_polyarea[idx] -> x, numOfElements, start, end);
-        add_points_m(vec_polyarea[main_idx] -> y, vec_polyarea[idx] -> y, numOfElements, start, end);
+
+        std::vector<int> tmp = addPoints(vec_polyarea[main_idx] -> x, vec_polyarea[idx] -> x, numOfElements, start, end);
+        add2Vector(tmp, vec_polyarea[main_idx] -> x);
+
+        tmp = addPoints(vec_polyarea[main_idx] -> y, vec_polyarea[idx] -> y, numOfElements, start, end);
+        add2Vector(tmp, vec_polyarea[main_idx] -> y);
     };
 
-    addPoints(start_1, end_1);
-    addPoints(start_2, end_2);
+    modVector(start_1, end_1, main_idx);
+    modVector(start_2, end_2, idx);
 
     // rewrite elements from chain_2 to chain_1
     int n_chain_2 = vec_polyarea[idx] -> x.size();
     std::cout << "n_chain_2: " << n_chain_2 << "\n";
-    
+
     while(n_chain_2--) { // this order connects end to end and head to head
         // x cord
         vec_polyarea[main_idx] -> x.push_back(vec_polyarea[idx] -> x[n_chain_2]);
@@ -417,7 +420,7 @@ void Polygon :: createImage() {
             for (int j = 0; j < 3; ++j)
                 image.at<cv::Vec3b>(vec_polyarea[i] -> getC().first + k,
                                     vec_polyarea[i] -> getC().second + j) = cv::Vec3b(125, 125, 125);
-        // std::cout << "Chain's size: " << vec_polyarea[i] -> x.size() << "\n";
+        std::cout << "Chain's size: " << vec_polyarea[i] -> x.size() << "\n";
     }
 
     cv::imwrite("data/savedImage.jpg", image);

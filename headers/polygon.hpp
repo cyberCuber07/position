@@ -58,6 +58,7 @@ public:
     void updatePolyArea();
     void createImage();
     Types::FixedQueue<float,2> getQueue(const int &, const int &, const int &, const int &);
+    std::vector<int> addPoints (Types::vec_i &, Types::vec_i &, const int &, const int &, const int &);
 };
 
 #endif
