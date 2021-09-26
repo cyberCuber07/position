@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <deque>
+#include <iostream>
 
 namespace Types{
 
@@ -79,13 +80,14 @@ float dis2(const int &, const int &);
 
 namespace LinSpace {
     // code from: https://stackoverflow.com/questions/27028226/python-linspace-in-c
-    template <typename T>
-    std::vector<double> linspace (T __startIn, T __endIn, int __numIn) {
+    template <typename K, typename T>
+    std::vector<K> linspace (T __startIn, T __endIn, int __numIn) {
         
-        std::vector<double> __nums;
+        std::cout << "INDEXES: " << __startIn << " " << __endIn << "\n\n";
+        std::vector<K> __nums;
 
-        const double __start = static_cast<double>(__startIn);
-        const double __end = static_cast<double>(__endIn);
+        const K __start = static_cast<K>(__startIn);
+        const K __end = static_cast<K>(__endIn);
 
         if (__numIn == 0) return __nums;
         if (__startIn == __endIn) return {__start};

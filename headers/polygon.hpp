@@ -57,6 +57,7 @@ public:
     void updateIndex(int &);
     void updatePolyArea();
     void createImage();
+    Types::FixedQueue<float,2> getQueue(const int &, const int &, const int &, const int &);
 };
 
 #endif
