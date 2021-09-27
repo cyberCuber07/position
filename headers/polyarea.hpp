@@ -26,6 +26,7 @@ public:
 
     float count_one_cord (const vec_i &); // helper method for "pair_2f center" method
     pair_2f getC();
+    float getArea();
 };
 
 #endif

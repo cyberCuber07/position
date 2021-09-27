@@ -1,0 +1,2 @@
+1. rebuild "mergeMasks" method --- just method calls inside
+2. [in "getQueue"] count area of created polygon to maximize it's area

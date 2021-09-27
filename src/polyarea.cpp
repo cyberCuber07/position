@@ -36,3 +36,8 @@ void PolyArea :: calculateCenter() {
 pair_2f PolyArea :: getC() {
     return C;
 }
+
+
+float PolyArea :: getArea() {
+    return area;
+}

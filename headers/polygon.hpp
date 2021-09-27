@@ -23,7 +23,7 @@
 using namespace Types;
 
 typedef std::vector<bool> vec_b;
-typedef std::vector<PolyArea*> vec_PolyArea;
+typedef extern std::vector<PolyArea*> vec_PolyArea;
 
 
 class Polygon{
@@ -39,12 +39,6 @@ private:
     cv::Mat read_image();
     void setMaskDistance(const float &);
     void setPointMaskDistance(const float &);
-    void mergeMasks (int &, int &);
-    void rebuildMasks (int &, const int &, int &, int &);
-    std::queue<int> bfs(vec_b &, const int &, const int &);
-    void mergeGroup (std::queue<int> & group);
-    void shift_array (const int &, const int &, const int &, const int &);
-    void sort_idx (int &, int &);
 public:
     float MASK_DISTANCE;
     float POINT_MASK_DISTANCE;
@@ -54,11 +48,8 @@ public:
     vec_i sameMasks(const int &);
     void connectMasks ();
     vec_PolyArea getVecPolyArea();
-    void updateIndex(int &);
     void updatePolyArea();
     void createImage();
-    Types::FixedQueue<float,2> getQueue(const int &, const int &, const int &, const int &);
-    std::vector<int> addPoints (Types::vec_i &, Types::vec_i &, const int &, const int &, const int &);
 };
 
 #endif
