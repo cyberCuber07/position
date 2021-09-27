@@ -42,7 +42,7 @@ namespace Types{
 
         FixedQueue<T, MaxLen> createFixedQueue () {
             FixedQueue<T, MaxLen> d;
-            for (int i = 0; i < MaxLen; ++i) d.push(1e9, -1, -1);
+            for (int i = 0; i < MaxLen; ++i) d.push(1e9, 0, 0);
             return d;
         }
     };

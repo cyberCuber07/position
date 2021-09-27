@@ -5,10 +5,10 @@
 #include <string>
 #include <cassert>
 #include <opencv2/highgui.hpp> // TODO: for now have been redundant
-#include "shapes.hpp"
-#include "polyarea.hpp"
+#include "../headers/shapes.hpp"
+#include "../headers/polyarea.hpp"
 #include "../headers/util.hpp"
-
+#include "../headers/extern.hpp"
 
 /*
  * this module reads an image
@@ -23,7 +23,7 @@
 using namespace Types;
 
 typedef std::vector<bool> vec_b;
-typedef extern std::vector<PolyArea*> vec_PolyArea;
+typedef std::vector<PolyArea*> vec_PolyArea;
 
 
 class Polygon{

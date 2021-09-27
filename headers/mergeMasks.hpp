@@ -12,17 +12,18 @@ class MergeMasks {
 protected:
     Types::vec_i x_1, y_1,
                  x_2, y_2;
+    Types::FixedQueue<float,2> q;
+    int start_1, end_1,
+        start_2, end_2;
 
-    Types::vec_2d_i mergeMasks (const int &, const int &, Types::FixedQueue<float,2> &);
-    Types::FixedQueue<float,2> getQueue(const int &, const int &, const int &, const int &);
+    Types::vec_2d_i mergeMasks (const int &, const int &);
     std::vector<int> addPoints (Types::vec_i &, Types::vec_i &, const int &, const int &, const int &);
     void sort_idx (int &, int &);
     void shift_array (const int &, const int &, const int &, const int &);
-    int preprocessIndexes(int &, int &, int &, int &);
     std::queue<int> bfs(vec_b &, const int &, const int &);
-    void updateIndex(int &);
 public:
     MergeMasks (const Types::vec_i &, const Types::vec_i &, const Types::vec_i &, const Types::vec_i &);
+    MergeMasks (Types::vec_i &, Types::vec_i &, Types::vec_i &, Types::vec_i &, const Types::FixedQueue<float,2> &);
 };
 
 

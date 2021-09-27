@@ -45,8 +45,10 @@ void Polygon :: setPointMaskDistance(const float & val=10) {
 Polygon :: Polygon (const std::string & file_path, const int & height, const int & width) : file_path(file_path), height(height), width(width) {
     assert (height > 0);
     assert (width > 0);
+ 
     setMaskDistance();
     setPointMaskDistance();
+ 
     image = read_image();
     vec_2d_b rect = read_file(file_path); // TODO: consider moving straight into get_all_shapes method call -> when creating "this -> shapes"
     shapes = get_all_shapes(rect);
@@ -123,11 +125,11 @@ void Polygon :: connectMasks () {
     std::cout << "Max number: " << vec_polyarea.size() << "\n";
     int cnt = 0;
     // create mergeGroup object
-    MergeGroup mergeGroup ();
+    MergeGroup merger();
     for (auto group : maskGroups) {
         std::cout << "Group's size: " << group.size() << "\n";
         cnt += group.size();
-        mergeGroup(group);
+        merger.mergeGroup(group);
         std::cout << "Group's finished\n\n";
     }
     std::cout << cnt << "\n";

@@ -2,7 +2,18 @@
 #include "../headers/mergeMasks.hpp"
 
 
-MergeMasks (const Types::vec_i & x_1, const Types::vec_i & y_1, const Types::vec_i & x_2, const Types::vec_i & y_2) : x_1(x_1), y_1(y_1), x_2(x_2), y_2(y_2)  {}
+MergeMasks :: MergeMasks (const Types::vec_i & x_1, const Types::vec_i & y_1, const Types::vec_i & x_2, const Types::vec_i & y_2, const int & start_1, const int & end_1, const int & start_2, const int & end_2) : x_1(x_1), y_1(y_1), x_2(x_2), y_2(y_2), start_1(start_1), end_1(end_1), start_2(start_2), end_2(end_2) {/* Test constructor --- used in mergeGroup :: getQueue method to find best pairs of indexes */}
+
+
+MergeMasks :: MergeMasks (Types::vec_i & x_1, Types::vec_i & y_1, Types::vec_i & x_2, Types::vec_i & y_2, const Types::FixedQueue<float,2> & q) : x_1(x_1), y_1(y_1), x_2(x_2), y_2(y_2), q(q) {
+    /* Final constructor --- modifies the vec_polarea vector!! */
+    start_1 = q.front().second.first,
+    end_1 = q.front().second.first,
+    q.pop();
+    start_2 = q.front().second.first,
+    end_2 = q.front().second.first;
+    q.pop();
+}
 
 
 void MergeMasks :: shift_array (const int & type_idx, const int & start, const int & end, const int & n) {
@@ -48,30 +59,6 @@ void Polygon :: sort_idx (int & idx1, int & idx2) {
 }
 
 
-void MergeMasks :: updateIndex(int & idx) {
-    int cnt = 0;
-    for (int x : deleted) if (x < idx) ++cnt;
-    idx -= cnt;
-}
-
-
-Types::FixedQueue<float,2> MergeMasks :: getQueue(const int & n1, const int & n2) {
-    Types::FixedQueue<float,2> q = Types::FixedQueue<float,2>().createFixedQueue();
-
-    for (int start = 0; start < n1; ++start) {
-        for (int end = 0; end < n2; ++end) {
-            float curr_dis = q.front().first, // get distance value
-                  tmp_dis = dis2(x_1 - x_2,
-                                 y_1 - y_2);
-            if (tmp_dis < curr_dis) { // add area check -> MAXIMIZE IT!!!
-                q.push(tmp_dis, start, end);
-            }
-        }
-    }
-    return q;
-}
-
-
 std::vector<int> MergeMasks :: addPoints (Types::vec_i & vec_1, Types::vec_i & vec_2, const int & numOfElements, const int & start, const int & end) {
     return LinSpace::linspace<int,int>(vec_1[start],
                                        vec_2[end],
@@ -83,7 +70,8 @@ std::vector<int> MergeMasks :: addPoints (Types::vec_i & vec_1, Types::vec_i & v
     // std::cout << "END\n";
 }
 
-Types::vec_2d_i MergeMasks :: mergeMasks (const int & n1, const int & n2, Types::FixedQueue<float,2> & q) {
+
+Types::vec_2d_i MergeMasks :: mergeMasks (const int & n1, const int & n2) {
     /*
      * iterate over masks' chains to find two closest pairs of connections (if any)
      *
@@ -108,12 +96,6 @@ Types::vec_2d_i MergeMasks :: mergeMasks (const int & n1, const int & n2, Types:
      * 2. rewrite values from one chain to another
      * 3. delete object of not changed chain
      * */
-    int start_1 = q.front().second.first,
-        end_1 = q.front().second.second;
-    q.pop();
-    int start_2 = q.front().second.first,
-        end_2 = q.front().second.second;
-    q.pop();
  
     // first, preprocess indexes
     /*
@@ -173,12 +155,9 @@ Types::vec_2d_i MergeMasks :: mergeMasks (const int & n1, const int & n2, Types:
         y_1.push_back(y_2[n_chain_2]);
     }
     std::cout << y_1.size() << "\n";
- 
 
     // third
     // TODO: delete chain_2 vec_polyarea object
-    std::cout << "size of vec_polyarea: " << vec_polyarea.size() << "\n";
-    vec_polyarea.erase(vec_polyarea.begin() + idx); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
     // deleted.push_back(tmp_idx); // <- NOTICE: moved to 
 
     return {x_1, y_1};
