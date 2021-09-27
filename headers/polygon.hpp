@@ -3,12 +3,10 @@
 
 
 #include <string>
-#include <cassert>
 #include <opencv2/highgui.hpp> // TODO: for now have been redundant
 #include "../headers/shapes.hpp"
 #include "../headers/polyarea.hpp"
 #include "../headers/util.hpp"
-#include "../headers/extern.hpp"
 
 /*
  * this module reads an image
@@ -22,7 +20,6 @@
 
 using namespace Types;
 
-typedef std::vector<bool> vec_b;
 typedef std::vector<PolyArea*> vec_PolyArea;
 
 
@@ -39,6 +36,7 @@ private:
     cv::Mat read_image();
     void setMaskDistance(const float &);
     void setPointMaskDistance(const float &);
+    std::queue<int> bfs(Types::vec_b &, const int &, const int &);
 public:
     float MASK_DISTANCE;
     float POINT_MASK_DISTANCE;

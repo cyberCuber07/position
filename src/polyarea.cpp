@@ -8,8 +8,8 @@ PolyArea :: PolyArea(const vec_i & x, const vec_i & y) : x(x), y(y) {
 }
 
 
-// TODO: think about better implementation
-PolyArea :: PolyArea(const Types::vec_2d_i & vec) : x(vec[0]), y(vec[1]) {
+// TODO: think about a better implementation
+PolyArea :: PolyArea(Types::vec_2d_i vec) : x(vec[0]), y(vec[1]) {
     n_x = n_y = x.size();
     calculateArea();
     calculateCenter();

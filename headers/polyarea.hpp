@@ -22,7 +22,7 @@ private:
     void calculateArea();
 public:   
     PolyArea(const vec_i &, const vec_i &);
-    PolyArea(const Types::vec_2d_i &);
+    PolyArea(Types::vec_2d_i);
     vec_i x, y; // chain: X0 cord and Y0 cord
     vec_p2f cord_x, cord_y; // complementary vectors for "x" and "y"
 

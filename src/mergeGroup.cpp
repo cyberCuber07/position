@@ -1,5 +1,6 @@
 
 #include "../headers/mergeGroup.hpp"
+#include "../headers/mergeMasks.hpp"
 
 
 MergeGroup ::MergeGroup (const vec_PolyArea & vec_polyarea) : vec_polyarea(vec_polyarea) {}
@@ -22,10 +23,10 @@ Types::FixedQueue<float,2> MergeGroup :: getQueue(const int & main_idx, const in
         for (int end = 0; end < n2_half; ++end) {
             int start_1, end_1, start_2, end_2;
             static auto calculateStartEnd = [&](){
-                start_1 = n1_half - i,
-                start_2 = n1_half + i,
-                end_1 = n2_half - j,
-                end_2 = n2_half + j;
+                start_1 = n1_half - start,
+                start_2 = n1_half + start,
+                end_1 = n2_half - end,
+                end_2 = n2_half + end;
             };
             calculateStartEnd();
  
@@ -50,7 +51,7 @@ Types::FixedQueue<float,2> MergeGroup :: getQueue(const int & main_idx, const in
 }
 
 
-void MergeGroup :: preprocessIndexes(int & main_idx, int & idx, int & n1, int & n2) {
+Types::FixedQueue<float,2> MergeGroup :: preprocessIndexes(int & main_idx, int & idx, int & n1, int & n2) {
     /*
      * STEP 0:
      *          Before preceding to alg,
@@ -84,13 +85,13 @@ void MergeGroup :: mergeGroup (std::queue<int> & group) {
         int n1, n2; // number of 
         int tmp_idx = idx2; // make a copy
 
-        q = preprocessIndexes(idx1, idx2, n1, n2);
+        Types::FixedQueue<float,2> q = preprocessIndexes(idx1, idx2, n1, n2);
 
         MergeMasks(
-            vec_polyarea[main_idx] -> x,
-            vec_polyarea[main_idx] -> y,
-            vec_polyarea[idx] -> x,
-            vec_polyarea[idx] -> y,
+            vec_polyarea[idx1] -> x,
+            vec_polyarea[idx1] -> y,
+            vec_polyarea[idx2] -> x,
+            vec_polyarea[idx2] -> y,
             q).mergeMasks(n1, n2);
 
         std::cout << "size of vec_polyarea: " << vec_polyarea.size() << "\n";

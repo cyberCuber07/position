@@ -1,4 +1,5 @@
 #include "../headers/polygon.hpp"
+#include "../headers/mergeGroup.hpp"
 #include <iostream>
 #include <algorithm> // for "std::rotate"
 #include <utility> // for "std::move"
@@ -125,7 +126,7 @@ void Polygon :: connectMasks () {
     std::cout << "Max number: " << vec_polyarea.size() << "\n";
     int cnt = 0;
     // create mergeGroup object
-    MergeGroup merger();
+    MergeGroup merger(vec_polyarea);
     for (auto group : maskGroups) {
         std::cout << "Group's size: " << group.size() << "\n";
         cnt += group.size();
@@ -176,4 +177,31 @@ void Polygon :: createImage() {
     }
 
     cv::imwrite("data/savedImage.jpg", image);
+}
+
+
+std::queue<int> Polygon :: bfs(Types::vec_b & vis, const int & idx, const int & n) {
+    std::queue<int> q;
+    q.push(idx);
+
+    static auto one_iter = [&](const int & k){
+        if (!vis[k] &&
+            dis2(vec_polyarea[k] -> getC(), vec_polyarea[idx] -> getC()) < Polygon::MASK_DISTANCE &&
+            vec_polyarea[k] -> x.size() >= 10)
+        {
+            std::cout << "vec_polyarea[" << k << "]: " << vec_polyarea[k] -> x.size() << "\n";
+            q.push(k);
+            vis[k] = true;
+        }
+    };
+    
+    // one bfs iter
+    // ---------------------
+    if (!vis[idx]) {
+        vis[idx] = true;
+        for (int j = 0; j < idx; ++j) one_iter(j);
+        for (int j = idx + 1; j < n; ++j) one_iter(j);
+    }
+    // ---------------------
+    return q;
 }
