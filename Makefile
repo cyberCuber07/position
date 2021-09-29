@@ -1,8 +1,8 @@
 build:
-	g++ main.cpp -o main src/*.cpp `pkg-config --cflags --libs opencv` -lboost_system -lboost_filesystem -Wall
+	g++ main.cpp -o _main src/*.cpp -lpthread `pkg-config --cflags --libs opencv` -lboost_system -lboost_filesystem -Wall
 
 clear:
-	rm main
+	rm _main
 
 run:
-	./main ../predicted_images/IMG_6298.txt
+	./_main ../predicted_images

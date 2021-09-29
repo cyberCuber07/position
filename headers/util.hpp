@@ -1,11 +1,17 @@
 #ifndef __UTIL_HPP_
 #define __UTIL_HPP_
 
+#include <string>
 #include <algorithm>
 #include <vector>
 #include <queue>
 #include <deque>
 #include <iostream>
+#include <thread>
+#include <boost/filesystem.hpp>
+
+// using b_fs = boost::filesystem;
+
 
 namespace Types{
 
@@ -21,7 +27,7 @@ namespace Types{
     typedef std::vector<std::vector<bool>> vec_2d_b;
     typedef std::vector<int> vec_i;
     typedef std::pair<float,float> pair_2f;
-    typedef std::pair<float, std::pair<int,int>> DisIdxs;
+    typedef std::pair<float, std::vector<int>> DisIdxs;
     /*
      * in DisIdxs:
      *      float              : distance
@@ -32,18 +38,18 @@ namespace Types{
     class FixedQueue : public std::queue<DisIdxs, Container> {
     public:
  
-        void push (const T & value, const int & idx1, const int & idx2) {
+        void push (const T & value, const int & start_1, const int & end_1, const int & start_2, const int & end_2) {
             // TODO: add automatic sorting -> check if second is smaller / greater
             //       add complex type :: typedef std::pair<float, std::pair<int,int>> DisIdxs
             if (this -> size() == MaxLen) {
                 this -> c.pop_front();
             }
-            std::queue<DisIdxs, Container> :: push (std::make_pair(value, std::make_pair(idx1, idx2)));
+            std::queue<DisIdxs, Container> :: push (std::make_pair(value, std::vector<int>{start_1, end_1, start_2, end_2}));
         }
 
         FixedQueue<T, MaxLen> createFixedQueue () {
             FixedQueue<T, MaxLen> d;
-            for (int i = 0; i < MaxLen; ++i) d.push(1e9, 0, 0);
+            for (int i = 0; i < MaxLen; ++i) d.push(1e9, -1, -1, -1, -1);
             return d;
         }
     };
@@ -83,9 +89,11 @@ namespace LinSpace {
     // code from: https://stackoverflow.com/questions/27028226/python-linspace-in-c
     template <typename K, typename T>
     std::vector<K> linspace (T __startIn, T __endIn, int __numIn) {
-        
-        std::cout << "INDEXES: " << __startIn << " " << __endIn << "\n\n";
+ 
         std::vector<K> __nums;
+
+        // std::cout << "INDEXES: " << __startIn << " " << __endIn << "\n\n";
+        // std::vector<K> __nums;
 
         const K __start = static_cast<K>(__startIn);
         const K __end = static_cast<K>(__endIn);
@@ -97,7 +105,7 @@ namespace LinSpace {
 
         const double __delta = (__end - __start) / (static_cast<double>(__numIn) - 1);
 
-        for (int __i = 0; __i < __numIn; ++__i)
+        for (int __i = 0; __i < __numIn - 1; ++__i)
             __nums[__i] = __start + __i * __delta;
 
         return __nums;
@@ -149,10 +157,6 @@ namespace LinSpace {
         return __numsND;
     }
 }
-
-
-
-
 
 
 #endif

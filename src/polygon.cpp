@@ -51,7 +51,7 @@ Polygon :: Polygon (const std::string & file_path, const int & height, const int
     setPointMaskDistance();
  
     image = read_image();
-    vec_2d_b rect = read_file(file_path); // TODO: consider moving straight into get_all_shapes method call -> when creating "this -> shapes"
+    vec_2d_b rect = read_file(file_path); // TODO: consider moving straight into get_all_shapes method call.when creating "this -> shapes"
     shapes = get_all_shapes(rect);
     get_all_centers();
 }
@@ -81,12 +81,10 @@ void Polygon :: get_all_centers() {
             x[i] = shapes[k][i].first;
             y[i] = shapes[k][i].second;
         }
-        PolyArea *tmp  = new PolyArea(x, y);
-        pair_2f pair_tmp = tmp -> getC();
+        PolyArea tmp(x, y);
+        const pair_2f pair_tmp = tmp.getC();
         if (pair_tmp.first != 0 && pair_tmp.second != 0){
-            vec_polyarea.push_back(std::move(tmp)); // TODO: Get rid of tmp --- memory LEAK !!!
-        } else {
-            delete tmp;
+            vec_polyarea.push_back(tmp); // TODO: Get rid of tmp --- memory LEAK !!!
         }
     }
 }
@@ -127,6 +125,7 @@ void Polygon :: connectMasks () {
     int cnt = 0;
     // create mergeGroup object
     MergeGroup merger(vec_polyarea);
+
     for (auto group : maskGroups) {
         std::cout << "Group's size: " << group.size() << "\n";
         cnt += group.size();
@@ -144,8 +143,8 @@ void Polygon :: connectMasks () {
 void Polygon :: updatePolyArea() {
     const int n = vec_polyarea.size();
     for (int i = 0; i < n; ++i)
-        vec_polyarea[i] = std::move(new PolyArea(vec_polyarea[i] -> x,
-                                                 vec_polyarea[i] -> y));
+        vec_polyarea[i] = std::move(PolyArea(vec_polyarea[i].x,
+                                             vec_polyarea[i].y));
 }
 
 
@@ -164,16 +163,16 @@ void Polygon :: createImage() {
     // TODO: add cathing errors!!!
     int n_vec = vec_polyarea.size();
     for (int i = 0; i < n_vec; ++i) {
-        int n_elements = vec_polyarea[i] -> x.size();
+        int n_elements = vec_polyarea[i].x.size();
         const cv::Vec3b color(255 / 6 * (i % 6), 255 / 6 * ((i + 1) % 6), 255 / 6 * ((i + 2) % 6));
         for (int k = 0; k < n_elements; ++k)
-            image.at<cv::Vec3b>(vec_polyarea[i] -> x[k],
-                                vec_polyarea[i] -> y[k]) = color;
+            image.at<cv::Vec3b>(vec_polyarea[i].x[k],
+                                vec_polyarea[i].y[k]) = color;
         for (int k = 0; k < 3; ++k)
             for (int j = 0; j < 3; ++j)
-                image.at<cv::Vec3b>(vec_polyarea[i] -> getC().first + k,
-                                    vec_polyarea[i] -> getC().second + j) = cv::Vec3b(125, 125, 125);
-        std::cout << "Chain's size: " << vec_polyarea[i] -> x.size() << "\n";
+                image.at<cv::Vec3b>(vec_polyarea[i].getC().first + k,
+                                    vec_polyarea[i].getC().second + j) = cv::Vec3b(125, 125, 125);
+        std::cout << "Chain's size: " << vec_polyarea[i].x.size() << "\n";
     }
 
     cv::imwrite("data/savedImage.jpg", image);
@@ -186,10 +185,10 @@ std::queue<int> Polygon :: bfs(Types::vec_b & vis, const int & idx, const int & 
 
     static auto one_iter = [&](const int & k){
         if (!vis[k] &&
-            dis2(vec_polyarea[k] -> getC(), vec_polyarea[idx] -> getC()) < Polygon::MASK_DISTANCE &&
-            vec_polyarea[k] -> x.size() >= 10)
+            dis2(vec_polyarea[k].getC(), vec_polyarea[idx].getC()) < Polygon::MASK_DISTANCE &&
+            vec_polyarea[k].x.size() >= 10)
         {
-            std::cout << "vec_polyarea[" << k << "]: " << vec_polyarea[k] -> x.size() << "\n";
+            std::cout << "vec_polyarea[" << k << "]: " << vec_polyarea[k].x.size() << "\n";
             q.push(k);
             vis[k] = true;
         }

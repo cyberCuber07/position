@@ -4,8 +4,8 @@
 // --------------------------------------------------------------------------------------------------------------------------------
 // Class: SelfCross // 
 SelfCross :: SelfCross (const int & start_1_x, const int & start_1_y,
-                        const int & end_1_x, const int & end_1_y,
                         const int & start_2_x, const int & start_2_y,
+                        const int & end_1_x, const int & end_1_y,
                         const int & end_2_x, const int & end_2_y)
 {
     start_1 = std::make_pair(start_1_x, start_1_y);
@@ -29,6 +29,8 @@ bool SelfCross :: ccw (const Types::pair_2i & pa, const Types::pair_2i & pb, con
 
 
 // --------------------------------------------------------------------------------------------------------------------------------
+
+
 
 float dis2(const Types::pair_2f & p1, const Types::pair_2f & p2) {
     /*

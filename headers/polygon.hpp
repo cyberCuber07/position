@@ -20,7 +20,7 @@
 
 using namespace Types;
 
-typedef std::vector<PolyArea*> vec_PolyArea;
+typedef std::vector<PolyArea> vec_PolyArea;
 
 
 class Polygon{

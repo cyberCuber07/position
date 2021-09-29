@@ -19,8 +19,8 @@ Types::FixedQueue<float,2> MergeGroup :: getQueue(const int & main_idx, const in
     const int n1_half = n1 / 2,
               n2_half = n2 / 2;
 
-    for (int start = 0; start < n1_half; ++start) {
-        for (int end = 0; end < n2_half; ++end) {
+    for (int start = 1; start < n1_half; ++start) {
+        for (int end = 1; end < n2_half; ++end) {
             int start_1, end_1, start_2, end_2;
             static auto calculateStartEnd = [&](){
                 start_1 = n1_half - start,
@@ -33,17 +33,17 @@ Types::FixedQueue<float,2> MergeGroup :: getQueue(const int & main_idx, const in
             float curr_area = q.front().first,
                   tmp_area = PolyArea(
                                      MergeMasks(
-                                         vec_polyarea[main_idx] -> x,
-                                         vec_polyarea[main_idx] -> y,
-                                         vec_polyarea[idx] -> x,
-                                         vec_polyarea[idx] -> y,
+                                         vec_polyarea[main_idx].x,
+                                         vec_polyarea[main_idx].y,
+                                         vec_polyarea[idx].x,
+                                         vec_polyarea[idx].y,
                                          start_1,
                                          end_1,
                                          start_2,
-                                         end_2).mergeMasks(n1, n2)
+                                         end_2).mergeMasks()
                                      ).getArea();
             if (tmp_area < curr_area) {
-                q.push(tmp_area, start, end);
+                q.push(tmp_area, start_1, end_1, start_2, end_2);
             }
         }
     }
@@ -51,7 +51,7 @@ Types::FixedQueue<float,2> MergeGroup :: getQueue(const int & main_idx, const in
 }
 
 
-Types::FixedQueue<float,2> MergeGroup :: preprocessIndexes(int & main_idx, int & idx, int & n1, int & n2) {
+void MergeGroup :: preprocessIndexes(int & main_idx, int & idx, int & n1, int & n2) {
     /*
      * STEP 0:
      *          Before preceding to alg,
@@ -60,10 +60,8 @@ Types::FixedQueue<float,2> MergeGroup :: preprocessIndexes(int & main_idx, int &
     updateIndex(main_idx);
     updateIndex(idx);
 
-    n1 = vec_polyarea[main_idx] -> x.size(),
-    n2 = vec_polyarea[idx] -> x.size();
-    
-    return getQueue(main_idx, idx, n1, n2);
+    n1 = vec_polyarea[main_idx].x.size(),
+    n2 = vec_polyarea[idx].x.size();
 }
 
 
@@ -81,18 +79,19 @@ void MergeGroup :: mergeGroup (std::queue<int> & group) {
 
         /* MAIN CODE */
         // __________________________________________________________
-     
-        int n1, n2; // number of 
+    
+        int n1, n2; 
         int tmp_idx = idx2; // make a copy
 
-        Types::FixedQueue<float,2> q = preprocessIndexes(idx1, idx2, n1, n2);
+        preprocessIndexes(idx1, idx2, n1, n2);
 
         MergeMasks(
-            vec_polyarea[idx1] -> x,
-            vec_polyarea[idx1] -> y,
-            vec_polyarea[idx2] -> x,
-            vec_polyarea[idx2] -> y,
-            q).mergeMasks(n1, n2);
+                vec_polyarea[idx1].x,
+                vec_polyarea[idx1].y,
+                vec_polyarea[idx2].x,
+                vec_polyarea[idx2].y,
+                getQueue(idx1, idx2, n1, n2)
+            ).mergeMasks();
 
         std::cout << "size of vec_polyarea: " << vec_polyarea.size() << "\n";
         vec_polyarea.erase(vec_polyarea.begin() + idx2); // TODO: this line causes MEMORY LEAK!!! --- delete the pointer
@@ -100,8 +99,8 @@ void MergeGroup :: mergeGroup (std::queue<int> & group) {
         deleted.push_back(std::move(tmp_idx));
  
 
-        std::cout << "idx_1_n: " << vec_polyarea[idx1] -> x.size() <<
-                   ", idx_2_n: " << vec_polyarea[idx2] -> y.size() << "\n";
+        std::cout << "idx_1_n: " << vec_polyarea[idx1].x.size() <<
+                   ", idx_2_n: " << vec_polyarea[idx2].y.size() << "\n";
 
         // __________________________________________________________
 
